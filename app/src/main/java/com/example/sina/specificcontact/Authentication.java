@@ -568,8 +568,9 @@ public class Authentication extends AppCompatActivity {
     {
         ActivityDialogChangePhone=new Dialog(Authentication.this);
         ActivityDialogChangePhone.requestWindowFeature(Window.FEATURE_NO_TITLE);
-        ActivityDialogChangePhone.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        Objects.requireNonNull(ActivityDialogChangePhone.getWindow()).setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
 
+        ActivityDialogChangePhone.getWindow().getAttributes().windowAnimations=R.style.DialogSlideLeftRight;
         ActivityDialogChangePhone.setContentView(R.layout.change_phone_dialog);
 
         ImageView Yes = (ImageView)ActivityDialogChangePhone.findViewById(R.id.ChangePhoneYes);
@@ -612,6 +613,7 @@ public class Authentication extends AppCompatActivity {
         ActivityDialogInternetConnectionAuthentication.requestWindowFeature(Window.FEATURE_NO_TITLE);
         Objects.requireNonNull(ActivityDialogInternetConnectionAuthentication.getWindow()).setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
 
+        ActivityDialogInternetConnectionAuthentication.getWindow().getAttributes().windowAnimations=R.style.DialogScale;
         ActivityDialogInternetConnectionAuthentication.setContentView(R.layout.error_connection_dialog);
 
         TextView TitleErrorConnectionDialog=(TextView)ActivityDialogInternetConnectionAuthentication.findViewById(R.id.TitleErrorConnectionDialog);
@@ -628,6 +630,7 @@ public class Authentication extends AppCompatActivity {
         ActivityDialogErrorCode.requestWindowFeature(Window.FEATURE_NO_TITLE);
         Objects.requireNonNull(ActivityDialogErrorCode.getWindow()).setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
 
+        ActivityDialogErrorCode.getWindow().getAttributes().windowAnimations=R.style.DialogScale;
         ActivityDialogErrorCode.setContentView(R.layout.error_code_dialog);
 
         TextView TitleErrorCode=(TextView)ActivityDialogErrorCode.findViewById(R.id.TitleErrorCode);
@@ -644,6 +647,7 @@ public class Authentication extends AppCompatActivity {
         ActivityDialogErrorTime.requestWindowFeature(Window.FEATURE_NO_TITLE);
         Objects.requireNonNull(ActivityDialogErrorTime.getWindow()).setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
 
+        ActivityDialogErrorTime.getWindow().getAttributes().windowAnimations=R.style.DialogScale;
         ActivityDialogErrorTime.setContentView(R.layout.error_time_dialog);
 
         TextView TitleErrorTime=(TextView)ActivityDialogErrorTime.findViewById(R.id.TitleErrorTime);
@@ -660,6 +664,7 @@ public class Authentication extends AppCompatActivity {
         ActivityDialogErrorSeconds.requestWindowFeature(Window.FEATURE_NO_TITLE);
         Objects.requireNonNull(ActivityDialogErrorSeconds.getWindow()).setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
 
+        ActivityDialogErrorSeconds.getWindow().getAttributes().windowAnimations=R.style.DialogScale;
         ActivityDialogErrorSeconds.setContentView(R.layout.error_seconds_dialog);
 
         TextView TitleErrorSeconds=(TextView)ActivityDialogErrorSeconds.findViewById(R.id.TitleErrorSeconds);
@@ -676,6 +681,7 @@ public class Authentication extends AppCompatActivity {
         ActivityDialogErrorHours.requestWindowFeature(Window.FEATURE_NO_TITLE);
         Objects.requireNonNull(ActivityDialogErrorHours.getWindow()).setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
 
+        ActivityDialogErrorHours.getWindow().getAttributes().windowAnimations=R.style.DialogScale;
         ActivityDialogErrorHours.setContentView(R.layout.error_hours_dialog);
 
         TextView TitleErrorHours=(TextView)ActivityDialogErrorHours.findViewById(R.id.TitleErrorHours);
@@ -692,6 +698,7 @@ public class Authentication extends AppCompatActivity {
         ActivityDialogExit.requestWindowFeature(Window.FEATURE_NO_TITLE);
         Objects.requireNonNull(ActivityDialogExit.getWindow()).setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
 
+        ActivityDialogExit.getWindow().getAttributes().windowAnimations=R.style.DialogSlideLeftRight;
         ActivityDialogExit.setContentView(R.layout.exit_dialog);
 
         ImageView ExitYes = (ImageView)ActivityDialogExit.findViewById(R.id.ExitYes);

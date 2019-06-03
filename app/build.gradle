@@ -12,7 +12,7 @@ android {
     }
     buildTypes {
         release {
-            minifyEnabled true
+            minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
@@ -54,7 +54,8 @@ dependencies {
     //For playing .gif images
     implementation 'pl.droidsonroids.gif:android-gif-drawable:1.2.16'
     implementation 'org.jetbrains:annotations-java5:15.0'
-    implementation 'com.squareup.okhttp3:okhttp:3.12.2'
+    implementation 'com.squareup.okhttp3:okhttp:3.12.3'
     implementation 'com.akexorcist:RoundCornerProgressBar:2.0.3'
     implementation 'com.uncopt:android.justified:1.0'
+    implementation 'com.github.lzyzsd:circleprogress:1.2.1'
 }

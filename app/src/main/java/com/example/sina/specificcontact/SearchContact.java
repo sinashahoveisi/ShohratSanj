@@ -89,7 +89,12 @@ public class SearchContact extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
 
-        getResultSearchContact();
+        try {
+            getResultSearchContact();
+        }catch (Exception e)
+        {
+            e.printStackTrace();
+        }
     }
 
     @Override
@@ -193,6 +198,7 @@ public class SearchContact extends AppCompatActivity {
         ActivityDialogInternetConnectionSearchContact.requestWindowFeature(Window.FEATURE_NO_TITLE);
         Objects.requireNonNull(ActivityDialogInternetConnectionSearchContact.getWindow()).setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
 
+        ActivityDialogInternetConnectionSearchContact.getWindow().getAttributes().windowAnimations=R.style.DialogScale;
         ActivityDialogInternetConnectionSearchContact.setContentView(R.layout.error_connection_dialog);
 
         TextView TitleErrorConnectionDialog=(TextView)ActivityDialogInternetConnectionSearchContact.findViewById(R.id.TitleErrorConnectionDialog);
@@ -203,12 +209,13 @@ public class SearchContact extends AppCompatActivity {
 
         ActivityDialogInternetConnectionSearchContact.show();
     }
-    public void ActivityDialogShowinformation(String Title,String Text)
+    public void ActivityDialogShowInformation(String Title,String Text)
     {
         ActivityDialogInformationSearchContact=new Dialog(SearchContact.this);
         ActivityDialogInformationSearchContact.requestWindowFeature(Window.FEATURE_NO_TITLE);
         Objects.requireNonNull(ActivityDialogInformationSearchContact.getWindow()).setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
 
+        ActivityDialogInformationSearchContact.getWindow().getAttributes().windowAnimations=R.style.DialogSlideLeftRight;
         ActivityDialogInformationSearchContact.setContentView(R.layout.information_dialog);
 
         TextView TitleInfoDialog=(TextView)ActivityDialogInformationSearchContact.findViewById(R.id.TitleInfoDialog);
@@ -228,6 +235,7 @@ public class SearchContact extends AppCompatActivity {
         ActivityDialogErrorSearchContact.requestWindowFeature(Window.FEATURE_NO_TITLE);
         Objects.requireNonNull(ActivityDialogErrorSearchContact.getWindow()).setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
 
+        ActivityDialogErrorSearchContact.getWindow().getAttributes().windowAnimations=R.style.DialogScale;
         ActivityDialogErrorSearchContact.setContentView(R.layout.error_dialog);
 
         TextView TextErrorDialog = (TextView)ActivityDialogErrorSearchContact.findViewById(R.id.TextErrorDialog);
@@ -246,6 +254,7 @@ public class SearchContact extends AppCompatActivity {
         ActivityDialogExitSearchContact.requestWindowFeature(Window.FEATURE_NO_TITLE);
         Objects.requireNonNull(ActivityDialogExitSearchContact.getWindow()).setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
 
+        ActivityDialogExitSearchContact.getWindow().getAttributes().windowAnimations=R.style.DialogSlideLeftRight;
         ActivityDialogExitSearchContact.setContentView(R.layout.exit_dialog);
 
         ImageView ExitYes = (ImageView)ActivityDialogExitSearchContact.findViewById(R.id.ExitYes);
@@ -498,7 +507,7 @@ public class SearchContact extends AppCompatActivity {
                                     }
                                     else if (ReqStatus == 2)
                                     {
-                                        ActivityDialogShowinformation("قــبلا ارســـال شـــده","درخواست شما با موفقیت قبلا ارسال شده است. برای مشاهده نتیجه لطفا صبور باشید. ");
+                                        ActivityDialogShowInformation("قــبلا ارســـال شـــده","درخواست شما با موفقیت قبلا ارسال شده است. برای مشاهده نتیجه لطفا صبور باشید. ");
                                     }
                                     else if (ReqStatus == 0)
                                     {

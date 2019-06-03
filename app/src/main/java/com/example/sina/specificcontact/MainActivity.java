@@ -196,6 +196,7 @@ public class MainActivity extends AppCompatActivity {
         ActivityDialogInternetConnection.requestWindowFeature(Window.FEATURE_NO_TITLE);
         Objects.requireNonNull(ActivityDialogInternetConnection.getWindow()).setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
 
+        ActivityDialogInternetConnection.getWindow().getAttributes().windowAnimations=R.style.DialogScale;
         ActivityDialogInternetConnection.setContentView(R.layout.error_connection_dialog);
 
         TextView TitleErrorConnectionDialog=(TextView)ActivityDialogInternetConnection.findViewById(R.id.TitleErrorConnectionDialog);

@@ -50,7 +50,7 @@
             android:layout_height="wrap_content"
             android:gravity="center"
             android:paddingTop="50dp"
-            android:paddingBottom="20dp"
+            android:paddingBottom="30dp"
             android:background="@drawable/title_bg"
             android:layout_marginBottom="0dp"
             android:orientation="horizontal">
@@ -60,6 +60,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="رتــبـه بــندی مخــاطـبـیـن"
+                android:textColor="#ffffff"
                 android:textSize="15sp"
                 android:textAlignment="center"
                 android:gravity="center" />
@@ -77,6 +78,7 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="30dp"
                 android:gravity="center"
                 android:orientation="vertical">
 
@@ -635,7 +637,7 @@
         android:background="@color/backgroundMainCardView"
         app:itemIconTint="@drawable/item_selected"
         app:itemTextColor="@drawable/item_selected"
-        app:labelVisibilityMode="selected"
+        app:labelVisibilityMode="labeled"
         app:itemIconSize="30dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"

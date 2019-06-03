@@ -27,6 +27,9 @@ import android.view.View;
 import android.view.Window;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -55,6 +58,10 @@ public class SearchPerson extends AppCompatActivity {
     TextView RankTitleUser;
     TextView RankUser;
     TextView TitlePerson;
+    TextView RankBetweenContact;
+    TextView RankContactTitleUser;
+
+    public static ProgressBar RankProgressBar;
 
     CountDownTimer ResultTimer;
     long  timeLeftInMiliseconds;
@@ -70,6 +77,10 @@ public class SearchPerson extends AppCompatActivity {
 
     Typeface font_Medium;
     Typeface font_Bold;
+    Typeface rank_font;
+
+    RelativeLayout RelativeProgress;
+    LinearLayout RelativeImage;
 
 
     static Context context;
@@ -160,18 +171,26 @@ public class SearchPerson extends AppCompatActivity {
         RankTitleUser=(TextView)findViewById(R.id.RankTitleUser);
         RankUser=(TextView)findViewById(R.id.RankUser);
         TitlePerson=(TextView)findViewById(R.id.titlePerson);
+        RankBetweenContact=(TextView)findViewById(R.id.RankBetweenContact);
+        RankContactTitleUser=(TextView)findViewById(R.id.RankContactTitleUser);
         bottomNavigationView=(BottomNavigationView) findViewById(R.id.bottom_navigation_view);
+        RankProgressBar=(ProgressBar)findViewById(R.id.RankProgressBar);
+        RelativeProgress=(RelativeLayout)findViewById(R.id.RelativeProgress);
+        RelativeImage=(LinearLayout) findViewById(R.id.RelativeImage);
 
         font_Medium= Typeface.createFromAsset(SearchPerson.context.getAssets(),"fonts/IRANSans_Medium.ttf");
         font_Bold=Typeface.createFromAsset(SearchPerson.context.getAssets(),"fonts/IRANSans_Bold.ttf");
-        
+        rank_font=Typeface.createFromAsset(SearchPerson.context.getAssets(),"fonts/SITKAB.TTC");
+
         Scan.setTypeface(font_Bold);
         PhoneTitleUser.setTypeface(font_Bold);
         RankTitleUser.setTypeface(font_Bold);
         TitlePerson.setTypeface(font_Bold);
-        
+        RankContactTitleUser.setTypeface(font_Bold);
+
         PhoneUser.setTypeface(font_Medium);
         RankUser.setTypeface(font_Medium);
+        RankBetweenContact.setTypeface(rank_font);
 
 
         stepView = findViewById(R.id.step_view);
@@ -222,6 +241,29 @@ public class SearchPerson extends AppCompatActivity {
             }
         });
 
+        RelativeProgress.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String number= (String) RankUser.getText();
+                number=number.replace(" %","");
+                if (number.equals("0"))
+                    ActivityDialogShowInformation("مــیـزان مـعروفـیـت","میزان معروفیت شما نا معلوم میباشد. برای محاسبه لطفا روی اسکن مخاطبین کلیک کنید.");
+                else
+                    ActivityDialogShowInformation("مــیـزان مـعروفـیـت","میزان معروفیت شما "+number+" درصد میباشد.");
+            }
+        });
+
+        RelativeImage.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String number= (String) RankBetweenContact.getText();
+                if (number.equals("0"))
+                    ActivityDialogShowInformation("رتــبـه بـیـن مخــاطبین","رتبه شما بین مخاطبین خود نا معلوم میباشد. برای محاسبه لطفا روی اسکن مخاطبین کلیک کنید.");
+                else
+                    ActivityDialogShowInformation("رتــبـه بـیـن مخــاطبین","شما رتبه "+number+" را در بین مخاطبین خود دارید.");
+            }
+        });
+
 
         Scan.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -243,7 +285,7 @@ public class SearchPerson extends AppCompatActivity {
                     @Override
                     public void onCancel(DialogInterface dialog) {
                         loading.show();
-                        ActivityDialogShowinformation("لطفا صبــــر کنید","درخواست شما در حال بررسی است.");
+                        ActivityDialogShowInformation("لطفا صبــــر کنید","درخواست شما در حال بررسی است.");
                     }
                 });
                 loading.show();
@@ -256,12 +298,12 @@ public class SearchPerson extends AppCompatActivity {
                             showContacts();
                         } catch (JSONException e) {
                             try {
-                if (loading.isShowing())
-                    loading.dismiss();
-            }catch (Exception el){
-                el.printStackTrace();
-            }
-            e.printStackTrace();
+                                if (loading.isShowing())
+                                    loading.dismiss();
+                            }catch (Exception el){
+                                el.printStackTrace();
+                            }
+                            e.printStackTrace();
                         }
 
                         JSONObject jsonObject = new JSONObject();
@@ -426,6 +468,12 @@ public class SearchPerson extends AppCompatActivity {
 
                                                                                                 RankUser.setText(ranking);
 
+                                                                                                int rankingInt = (int) jObject.getDouble("rank");
+                                                                                                RankProgressBar.setProgress(rankingInt);
+
+                                                                                                String rankingContact = String.valueOf(jObject.getInt("rankBetweenContact"));
+                                                                                                RankBetweenContact.setText(rankingContact);
+
                                                                                                 ActivityDialogShowSuccess("درخواست شما با موفقیت ثبت شد. شما می توانید نتیجه را مشاهده کنید. ");
                                                                                                 stepView.done(true);
 
@@ -473,10 +521,14 @@ public class SearchPerson extends AppCompatActivity {
                                                                                                 ActivityDialogShowError("درخواست شما ارسال نشد. برای مشاهده مهمترین مخاطب لطفا تعداد مخاطبین خود را افزایش داده و سپس روی گزینه اسکن مخاطبین کلیک کنید. ", false);
                                                                                             } else if (ErrorCode == 4001) {
                                                                                                 ActivityDialogShowError("درخواست شما ارسال نشد. مشکلی در ثبت شماره شما در سرور به وجود آمده است و برای رفع آن باید شماره ی خود را دوباره تأیید کنید. ", true);
-                                                                                            } else if (ErrorCode == 4008) {
+                                                                                            }else if (ErrorCode == 4002) {
+                                                                                                ActivityDialogShowError("درخواست شما ارسال نشد. مدت زمان زیادی درخواستی از جانب شما ارسال نشده است و برای رفع آن باید شماره ی خود را دوباره تأیید کنید. ", true);
+                                                                                            }else if (ErrorCode == 4008) {
                                                                                                 ActivityDialogShowError("درخواست شما ارسال نشد. مشکلی در شماره برخی از مخاطبین شما وجود دارد که خواندن آن با مشکل مواجه شده است. ", false);
                                                                                             } else if (ErrorCode == 4041) {
-                                                                                                ActivityDialogShowinformation("درخـــواستــی ارســـال نــشده", "درخواستی از جانب شما ارسال نشده است.  برای مشاهده مهمترین مخاطب لطفا روی گزینه اسکن مخاطبین کلیک کنید. ");
+                                                                                                ActivityDialogShowInformation("درخـــواستــی ارســـال نــشده", "درخواستی از جانب شما ارسال نشده است. برای مشاهده مهمترین مخاطب لطفا روی گزینه اسکن مخاطبین کلیک کنید. ");
+                                                                                            } else if (ErrorCode == 4040) {
+                                                                                                ActivityDialogShowInformation("درخـواست قـبـلا ارسـال شـده", "درخواست از جانب شما قبلا ارسال شده است. برای ارسال درخواست جدید باید تغییری در مخاطبین شما به وجود آید. ");
                                                                                             } else {
                                                                                                 ActivityDialogShowError("درخواست شما ارسال نشد. علت این ناموفقیت نامشخص است. ", false);
                                                                                             }
@@ -544,16 +596,20 @@ public class SearchPerson extends AppCompatActivity {
                                                         if (loading.isShowing())
                                                             loading.dismiss();
 
-                                                        Boolean IsPermission = getSharedPreferences("PREFERENCE", MODE_PRIVATE).getBoolean("ispermission", false);
+                                                        boolean IsPermission = getSharedPreferences("PREFERENCE", MODE_PRIVATE).getBoolean("ispermission", false);
                                                         if (IsPermission || Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
                                                             if (ErrorCode == 4030) {
                                                                 ActivityDialogShowError("درخواست شما ارسال نشد. برای مشاهده مهمترین مخاطب لطفا تعداد مخاطبین خود را افزایش داده و سپس روی گزینه اسکن مخاطبین کلیک کنید. ", false);
                                                             } else if (ErrorCode == 4001) {
                                                                 ActivityDialogShowError("درخواست شما ارسال نشد. مشکلی در ثبت شماره شما در سرور به وجود آمده است و برای رفع آن باید شماره ی خود را دوباره تأیید کنید. ", true);
+                                                            } else if (ErrorCode == 4002) {
+                                                                ActivityDialogShowError("درخواست شما ارسال نشد. مدت زمان زیادی درخواستی از جانب شما ارسال نشده است و برای رفع آن باید شماره ی خود را دوباره تأیید کنید. ", true);
                                                             } else if (ErrorCode == 4008) {
                                                                 ActivityDialogShowError("درخواست شما ارسال نشد. مشکلی در شماره برخی از مخاطبین شما وجود دارد که خواندن آن با مشکل مواجه شده است. ", false);
+                                                            } else if (ErrorCode == 4041) {
+                                                                ActivityDialogShowInformation("درخـــواستــی ارســـال نــشده", "درخواستی از جانب شما ارسال نشده است. برای مشاهده مهمترین مخاطب لطفا روی گزینه اسکن مخاطبین کلیک کنید. ");
                                                             } else if (ErrorCode == 4040) {
-                                                                ActivityDialogShowinformation("قــبلا ارســـال شـــده", "درخواست شما با موفقیت قبلا ارسال شده است. برای مشاهده نتیجه لطفا صبور باشید. ");
+                                                                ActivityDialogShowInformation("درخـواست قـبـلا ارسـال شـده", "درخواست از جانب شما قبلا ارسال شده است. برای ارسال درخواست جدید باید تغییری در مخاطبین شما به وجود آید. ");
                                                             } else {
                                                                 ActivityDialogShowError("درخواست شما ارسال نشد. علت این ناموفقیت نامشخص است. ", false);
                                                             }
@@ -745,7 +801,6 @@ public class SearchPerson extends AppCompatActivity {
     public static String charRemoveAt(String str, int p) {
         return str.substring(0, p) + str.substring(p + 1);
     }
-
     @Override
     public void onBackPressed() {
         ActivityDialogShowExitSearch();
@@ -756,8 +811,9 @@ public class SearchPerson extends AppCompatActivity {
         ActivityDialogSuccess.requestWindowFeature(Window.FEATURE_NO_TITLE);
         Objects.requireNonNull(ActivityDialogSuccess.getWindow()).setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
 
+        ActivityDialogSuccess.getWindow().getAttributes().windowAnimations=R.style.DialogSlideUpDown;
         ActivityDialogSuccess.setContentView(R.layout.success_dialog);
-        
+
         TextView TextSuccessDialog=(TextView)ActivityDialogSuccess.findViewById(R.id.TextSuccessDialog);
         TextView TitleSuccessDialog=(TextView)ActivityDialogSuccess.findViewById(R.id.TitleSuccessDialog);
 
@@ -768,12 +824,13 @@ public class SearchPerson extends AppCompatActivity {
 
         ActivityDialogSuccess.show();
     }
-    public void ActivityDialogShowinformation(String Title,String Text)
+    public void ActivityDialogShowInformation(String Title, String Text)
     {
         ActivityDialogInformation=new Dialog(SearchPerson.this);
         ActivityDialogInformation.requestWindowFeature(Window.FEATURE_NO_TITLE);
         Objects.requireNonNull(ActivityDialogInformation.getWindow()).setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
 
+        ActivityDialogInformation.getWindow().getAttributes().windowAnimations=R.style.DialogSlideLeftRight;
         ActivityDialogInformation.setContentView(R.layout.information_dialog);
 
         TextView TitleInfoDialog=(TextView)ActivityDialogInformation.findViewById(R.id.TitleInfoDialog);
@@ -794,6 +851,7 @@ public class SearchPerson extends AppCompatActivity {
         ActivityDialogError.requestWindowFeature(Window.FEATURE_NO_TITLE);
         Objects.requireNonNull(ActivityDialogError.getWindow()).setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
 
+        ActivityDialogError.getWindow().getAttributes().windowAnimations=R.style.DialogScale;
         ActivityDialogError.setContentView(R.layout.error_dialog);
 
         TextView TextErrorDialog = (TextView)ActivityDialogError.findViewById(R.id.TextErrorDialog);
@@ -827,6 +885,7 @@ public class SearchPerson extends AppCompatActivity {
         ActivityDialogInternetConnectionSearchPerson.requestWindowFeature(Window.FEATURE_NO_TITLE);
         Objects.requireNonNull(ActivityDialogInternetConnectionSearchPerson.getWindow()).setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
 
+        ActivityDialogInternetConnectionSearchPerson.getWindow().getAttributes().windowAnimations=R.style.DialogScale;
         ActivityDialogInternetConnectionSearchPerson.setContentView(R.layout.error_connection_dialog);
 
         TextView TitleErrorConnectionDialog=(TextView)ActivityDialogInternetConnectionSearchPerson.findViewById(R.id.TitleErrorConnectionDialog);
@@ -843,6 +902,7 @@ public class SearchPerson extends AppCompatActivity {
         ActivityDialogExitSearch.requestWindowFeature(Window.FEATURE_NO_TITLE);
         Objects.requireNonNull(ActivityDialogExitSearch.getWindow()).setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
 
+        ActivityDialogExitSearch.getWindow().getAttributes().windowAnimations=R.style.DialogSlideLeftRight;
         ActivityDialogExitSearch.setContentView(R.layout.exit_dialog);
 
         ImageView ExitYes = (ImageView)ActivityDialogExitSearch.findViewById(R.id.ExitYes);
@@ -971,6 +1031,12 @@ public class SearchPerson extends AppCompatActivity {
 
                                                     RankUser.setText(ranking);
 
+                                                    int rankingInt = (int) jObject.getDouble("rank");
+                                                    RankProgressBar.setProgress(rankingInt);
+
+                                                    String rankingContact = String.valueOf(jObject.getInt("rankBetweenContact"));
+                                                    RankBetweenContact.setText(rankingContact);
+
                                                     ActivityDialogShowSuccess("درخواست شما با موفقیت ثبت شد. شما می توانید نتیجه را مشاهده کنید. ");
                                                     stepView.done(true);
 
@@ -1046,14 +1112,21 @@ public class SearchPerson extends AppCompatActivity {
                                             {
                                                 ActivityDialogShowError("درخواست شما ارسال نشد. مشکلی در ثبت شماره شما در سرور به وجود آمده است و برای رفع آن باید شماره ی خود را دوباره تأیید کنید. ",true);
                                             }
+                                            else if (ErrorCode == 4002)
+                                            {
+                                                ActivityDialogShowError("درخواست شما ارسال نشد. مدت زمان زیادی درخواستی از جانب شما ارسال نشده است و برای رفع آن باید شماره ی خود را دوباره تأیید کنید. ", true);
+                                            }
                                             else if (ErrorCode==4008)
                                             {
                                                 ActivityDialogShowError("درخواست شما ارسال نشد. مشکلی در شماره برخی از مخاطبین شما وجود دارد که خواندن آن با مشکل مواجه شده است. ",false);
                                             }
-                                            else if (ErrorCode==4041)
+                                            else if (ErrorCode == 4041)
                                             {
-                                                ActivityDialogShowinformation("درخـــواستــی ارســـال نــشده","درخواستی از جانب شما ارسال نشده است.  برای مشاهده مهمترین مخاطب لطفا روی گزینه اسکن مخاطبین کلیک کنید. ");
-
+                                                ActivityDialogShowInformation("درخـــواستــی ارســـال نــشده", "درخواستی از جانب شما ارسال نشده است. برای مشاهده مهمترین مخاطب لطفا روی گزینه اسکن مخاطبین کلیک کنید. ");
+                                            }
+                                            else if (ErrorCode == 4040)
+                                            {
+                                                ActivityDialogShowInformation("درخـواست قـبـلا ارسـال شـده", "درخواست از جانب شما قبلا ارسال شده است. برای ارسال درخواست جدید باید تغییری در مخاطبین شما به وجود آید. ");
                                             }
                                             else
                                             {
@@ -1194,6 +1267,12 @@ public class SearchPerson extends AppCompatActivity {
 
                                                 RankUser.setText(ranking);
 
+                                                int rankingInt = (int) jObject.getDouble("rank");
+                                                RankProgressBar.setProgress(rankingInt);
+
+                                                String rankingContact = String.valueOf(jObject.getInt("rankBetweenContact"));
+                                                RankBetweenContact.setText(rankingContact);
+
                                                 stepView.done(true);
 
                                                 Scan.setText("اسکن مجدد مخاطبین");
@@ -1212,7 +1291,7 @@ public class SearchPerson extends AppCompatActivity {
                                             }
                                         } else if (ReqStatus == 2) {
                                             try {
-                                                ActivityDialogShowinformation("قــبلا ارســـال شـــده", "درخواست شما با موفقیت قبلا ارسال شده است. برای مشاهده نتیجه لطفا صبور باشید. ");
+                                                ActivityDialogShowInformation("قــبلا ارســـال شـــده", "درخواست شما با موفقیت قبلا ارسال شده است. برای مشاهده نتیجه لطفا صبور باشید. ");
                                                 StartTimer();
                                             }catch (Exception e)
                                             {
@@ -1293,20 +1372,21 @@ public class SearchPerson extends AppCompatActivity {
                                             }
                                             e.printStackTrace();
                                        }
-
                                         if (ErrorCode == 4030) {
                                             ActivityDialogShowError("درخواست شما ارسال نشد. برای مشاهده مهمترین مخاطب لطفا تعداد مخاطبین خود را افزایش داده و سپس روی گزینه اسکن مخاطبین کلیک کنید. ", false);
                                         } else if (ErrorCode == 4001) {
                                             ActivityDialogShowError("درخواست شما ارسال نشد. مشکلی در ثبت شماره شما در سرور به وجود آمده است و برای رفع آن باید شماره ی خود را دوباره تأیید کنید. ", true);
+                                        } else if (ErrorCode == 4002) {
+                                            ActivityDialogShowError("درخواست شما ارسال نشد. مدت زمان زیادی درخواستی از جانب شما ارسال نشده است و برای رفع آن باید شماره ی خود را دوباره تأیید کنید. ", true);
                                         } else if (ErrorCode == 4008) {
                                             ActivityDialogShowError("درخواست شما ارسال نشد. مشکلی در شماره برخی از مخاطبین شما وجود دارد که خواندن آن با مشکل مواجه شده است. ", false);
                                         } else if (ErrorCode == 4041) {
-                                            ActivityDialogShowinformation("درخــواستــی ارســال نـشده", "درخواستی از جانب شما ارسال نشده است.  برای مشاهده مهمترین مخاطب لطفا روی گزینه اسکن مخاطبین کلیک کنید. ");
-
+                                            ActivityDialogShowInformation("درخـــواستــی ارســـال نــشده", "درخواستی از جانب شما ارسال نشده است. برای مشاهده مهمترین مخاطب لطفا روی گزینه اسکن مخاطبین کلیک کنید. ");
+                                        } else if (ErrorCode == 4040) {
+                                            ActivityDialogShowInformation("درخـواست قـبـلا ارسـال شـده", "درخواست از جانب شما قبلا ارسال شده است. برای ارسال درخواست جدید باید تغییری در مخاطبین شما به وجود آید. ");
                                         } else {
                                             ActivityDialogShowError("درخواست شما ارسال نشد. علت این ناموفقیت نامشخص است. ", false);
                                         }
-
                                     }
                                 });
                             } catch (Exception e) {

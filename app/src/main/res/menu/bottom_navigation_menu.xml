@@ -3,9 +3,9 @@
 
     <item android:id="@+id/navigation_person"
         android:icon="@drawable/person"
-        android:title=""/>
+        android:title="رتــبـه بــندی شـخـصی"/>
     <item android:id="@+id/navigation_contacts"
         android:icon="@drawable/contacts"
-        android:title=""/>
+        android:title="رتــبـه بــندی مخــاطـبـیـن"/>
 
 </menu>
