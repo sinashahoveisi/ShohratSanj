@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/backgroundMainCardView"
-    tools:context=".SearchContact">
+    tools:context=".ContactActivity">
 
     <LinearLayout
         android:id="@+id/linearLayout"
@@ -59,21 +59,17 @@
                 android:id="@+id/titleContact"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="رتــبـه بــندی مخــاطـبـیـن"
+                android:text="مخــاطـبـیـن"
                 android:textColor="#ffffff"
-                android:textSize="13sp"
+                android:textSize="15sp"
                 android:textAlignment="center"
                 android:gravity="center" />
-            <ImageView
-                android:layout_width="28dp"
-                android:layout_height="28dp"
-                android:layout_marginStart="20dp"
-                android:src="@drawable/contacts"/>
         </LinearLayout>
 
         <ScrollView
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="match_parent"
+            android:layout_marginBottom="100dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -614,34 +610,108 @@
                                     android:textSize="13sp"
                                     tools:textColor="@android:color/darker_gray" />
 
-
                             </LinearLayout>
                         </LinearLayout>
                     </LinearLayout>
 
                 </android.support.v7.widget.CardView>
 
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="80dp"
-                    android:background="@color/backgroundMainCardView" />
-
             </LinearLayout>
         </ScrollView>
     </LinearLayout>
 
-    <android.support.design.widget.BottomNavigationView
-        android:id="@+id/bottom_navigation_view"
+    <FrameLayout
+        android:id="@+id/container"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="#FFFFFF"
-        app:itemIconTint="@drawable/item_selected"
-        app:itemTextColor="@drawable/item_selected"
-        app:labelVisibilityMode="labeled"
-        app:itemIconSize="30dp"
-        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_height="0dip"
+        app:layout_constraintBottom_toTopOf="@+id/bottom_navigation_view_linear"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:menu="@menu/bottom_navigation_menu" />
+        app:layout_constraintTop_toTopOf="parent"/>
+
+    <com.gauravk.bubblenavigation.BubbleNavigationLinearView
+        android:id="@+id/bottom_navigation_view_linear"
+        android:layout_width="match_parent"
+        android:layout_height="80dp"
+        android:background="@drawable/bottom_navigation_bg"
+        android:elevation="8dp"
+        android:orientation="horizontal"
+        android:layout_margin="8dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <com.gauravk.bubblenavigation.BubbleToggleView
+            android:id="@+id/navigation_scan"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:bt_active="false"
+            android:layout_marginEnd="15dp"
+            app:bt_colorActive="#f44336"
+            app:bt_colorInactive="#e57373"
+            app:bt_icon="@drawable/scan"
+            app:bt_padding="5dp"
+            app:bt_shape="@drawable/transition_background_drawable_scan"
+            app:bt_title="اسکن"
+            app:bt_titlePadding="10dp" />
+
+
+        <com.gauravk.bubblenavigation.BubbleToggleView
+            android:id="@+id/navigation_fame"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:bt_active="false"
+            app:bt_colorActive="#03a9f4"
+            app:bt_colorInactive="#64b5f6"
+            android:layout_marginEnd="15dp"
+            app:bt_icon="@drawable/fame"
+            app:bt_padding="5dp"
+            app:bt_shape="@drawable/transition_background_drawable_fame"
+            app:bt_title="معروفیت"
+            app:bt_titlePadding="10dp" />
+
+        <com.gauravk.bubblenavigation.BubbleToggleView
+            android:id="@+id/navigation_rank"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:bt_active="false"
+            android:layout_marginEnd="15dp"
+            app:bt_colorActive="#CC145F"
+            app:bt_colorInactive="#FD54A6"
+            app:bt_icon="@drawable/ranking"
+            app:bt_padding="5dp"
+            app:bt_shape="@drawable/transition_background_drawable_rank"
+            app:bt_title="رتــبـه"
+            app:bt_titlePadding="10dp" />
+
+        <com.gauravk.bubblenavigation.BubbleToggleView
+            android:id="@+id/navigation_likeness"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:bt_active="false"
+            app:bt_colorActive="#ffeb3b"
+            app:bt_colorInactive="#fff176"
+            android:layout_marginEnd="15dp"
+            app:bt_icon="@drawable/common_contact"
+            app:bt_padding="5dp"
+            app:bt_shape="@drawable/transition_background_drawable_likeness"
+            app:bt_title="شباهت"
+            app:bt_titlePadding="10dp" />
+
+        <com.gauravk.bubblenavigation.BubbleToggleView
+            android:id="@+id/navigation_contacts"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:bt_active="true"
+            app:bt_colorActive="#9c27b0"
+            app:bt_colorInactive="#ba68c8"
+            app:bt_icon="@drawable/contacts"
+            app:bt_padding="5dp"
+            app:bt_shape="@drawable/transition_background_drawable_contacts"
+            app:bt_title="مخــاطـبـیـن"
+            app:bt_titlePadding="10dp" />
+
+
+    </com.gauravk.bubblenavigation.BubbleNavigationLinearView>
 
 </android.support.constraint.ConstraintLayout>

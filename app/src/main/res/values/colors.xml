@@ -6,5 +6,16 @@
     <color name="cardViewBackground">#FFFFFF</color>
     <color name="backgroundMainCardView">#E5E5F1</color>
     <color name="coloreee">#BCF1EEE4</color>
+    <color name="black">#000000</color>
     <color name="textColor">#292730</color>
+    <color name="scanCircle">#00E57373</color>
+    <color name="scantargetCircle">#f44336</color>
+    <color name="rankCircle">#00FD54A6</color>
+    <color name="ranktargetCircle">#CC145F</color>
+    <color name="fameCircle">#0064B5F6</color>
+    <color name="fametargetCircle">#03a9f4</color>
+    <color name="likenessCircle">#00FFF176</color>
+    <color name="likenesstargetCircle">#ffeb3b</color>
+    <color name="contactsCircle">#00BA68C8</color>
+    <color name="contactstargetCircle">#9c27b0</color>
 </resources>

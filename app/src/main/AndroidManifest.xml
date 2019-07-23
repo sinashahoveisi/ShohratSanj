@@ -6,8 +6,10 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.READ_CONTACTS" />
+    <uses-permission android:name="android.permission.RECEIVE_SMS" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.VIBRATE" />
+
 
     <application
         android:allowBackup="true"
@@ -20,13 +22,18 @@
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true"
         tools:ignore="GoogleAppIndexingWarning">
-        <activity android:name=".SearchContact"
-            android:screenOrientation="portrait"/>
+        <activity android:name=".LikenessActivity"></activity>
+        <activity android:name=".FameActivity" />
+        <activity android:name=".RankActivity" />
+        <activity
+            android:name=".ContactActivity"
+            android:screenOrientation="portrait" />
         <activity
             android:name=".MainActivity"
             android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
@@ -34,8 +41,20 @@
             android:name=".Authentication"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".SearchPerson"
+            android:name=".ScanActivity"
             android:screenOrientation="portrait" />
+
+        <receiver
+            android:name=".SmsReceiver"
+            android:enabled="true"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.provider.Telephony.SMS_RECEIVED">
+                </action>
+            </intent-filter>
+
+        </receiver>
+
     </application>
 
 </manifest>

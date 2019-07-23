@@ -16,23 +16,23 @@ import android.graphics.drawable.ColorDrawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.CountDownTimer;
+import android.os.Handler;
 import android.provider.ContactsContract;
-import android.support.annotation.NonNull;
 import android.support.annotation.RequiresApi;
-import android.support.design.widget.BottomNavigationView;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
 import android.widget.Button;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.ProgressBar;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.gauravk.bubblenavigation.BubbleNavigationLinearView;
+import com.gauravk.bubblenavigation.BubbleToggleView;
+import com.gauravk.bubblenavigation.listener.BubbleNavigationChangeListener;
+import com.getkeepsafe.taptargetview.TapTarget;
+import com.getkeepsafe.taptargetview.TapTargetView;
 import com.shuhart.stepview.StepView;
 
 import org.json.JSONArray;
@@ -51,37 +51,29 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 
-public class SearchPerson extends AppCompatActivity {
+import static com.example.sina.specificcontact.RankActivity.numberCommonContact;
+import static com.example.sina.specificcontact.RankActivity.ranking;
 
-    TextView PhoneTitleUser;
+public class ScanActivity extends AppCompatActivity {
+
+
     TextView PhoneUser;
-    TextView RankTitleUser;
-    TextView RankUser;
+    TextView PhoneTitleUser;
     TextView TitlePerson;
-    TextView RankBetweenContact;
-    TextView RankContactTitleUser;
-
-    public static ProgressBar RankProgressBar;
 
     CountDownTimer ResultTimer;
     long  timeLeftInMiliseconds;
     public boolean TimerIsON ;
 
-    public static boolean FromContactActivity=false;
+    public  Dialog ActivityDialogSuccess;
+    public  Dialog ActivityDialogError;
+    public  Dialog ActivityDialogInformation;
+    public  Dialog ActivityDialogInternetConnectionSearchPerson;
+    public  Dialog ActivityDialogExitSearch;
 
-    public static Dialog ActivityDialogSuccess;
-    public static Dialog ActivityDialogError;
-    public static Dialog ActivityDialogInformation;
-    public static Dialog ActivityDialogInternetConnectionSearchPerson;
-    public static Dialog ActivityDialogExitSearch;
 
     Typeface font_Medium;
     Typeface font_Bold;
-    Typeface rank_font;
-
-    RelativeLayout RelativeProgress;
-    LinearLayout RelativeImage;
-
 
     static Context context;
 
@@ -93,13 +85,12 @@ public class SearchPerson extends AppCompatActivity {
     private static final int PERMISSIONS_REQUEST_READ_CONTACTS = 100;
 
     StepView stepView;
-
-    BottomNavigationView bottomNavigationView;
+    
+    public BubbleNavigationLinearView bottom_navigation_view_linear;
 
     @Override
     protected void onStart() {
         super.onStart();
-        FromContactActivity=false;
         try {
             if (ActivityDialogSuccess.isShowing())
                 ActivityDialogSuccess.dismiss();
@@ -144,7 +135,24 @@ public class SearchPerson extends AppCompatActivity {
         }
 
         try {
-            OnStartSearchPerson();
+            final Handler handler = new Handler();
+            handler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        boolean GuideDone = getSharedPreferences("PREFERENCE",MODE_PRIVATE).getBoolean("guidedone",false);
+                        if (!GuideDone)
+                            Guide();
+                        else
+                            OnStartSearchPerson();
+                    }
+                    catch (Exception e)
+                    {
+                        e.printStackTrace();
+                    }
+                }
+            }, 500);
+
         }catch (Exception e)
         {
             try {
@@ -161,63 +169,30 @@ public class SearchPerson extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_search_person);
+        setContentView(R.layout.activity_scan);
 
         context=getApplicationContext();
 
         Scan = (Button) findViewById(R.id.Scan);
-        PhoneTitleUser=(TextView)findViewById(R.id.PhoneTitleUser);
         PhoneUser=(TextView)findViewById(R.id.PhoneUser);
-        RankTitleUser=(TextView)findViewById(R.id.RankTitleUser);
-        RankUser=(TextView)findViewById(R.id.RankUser);
         TitlePerson=(TextView)findViewById(R.id.titlePerson);
-        RankBetweenContact=(TextView)findViewById(R.id.RankBetweenContact);
-        RankContactTitleUser=(TextView)findViewById(R.id.RankContactTitleUser);
-        bottomNavigationView=(BottomNavigationView) findViewById(R.id.bottom_navigation_view);
-        RankProgressBar=(ProgressBar)findViewById(R.id.RankProgressBar);
-        RelativeProgress=(RelativeLayout)findViewById(R.id.RelativeProgress);
-        RelativeImage=(LinearLayout) findViewById(R.id.RelativeImage);
+        PhoneTitleUser=(TextView)findViewById(R.id.PhoneTitleUser);
+        bottom_navigation_view_linear=(BubbleNavigationLinearView) findViewById(R.id.bottom_navigation_view_linear);
 
-        font_Medium= Typeface.createFromAsset(SearchPerson.context.getAssets(),"fonts/IRANSans_Medium.ttf");
-        font_Bold=Typeface.createFromAsset(SearchPerson.context.getAssets(),"fonts/IRANSans_Bold.ttf");
-        rank_font=Typeface.createFromAsset(SearchPerson.context.getAssets(),"fonts/SITKAB.TTC");
+
+        font_Medium= Typeface.createFromAsset(ScanActivity.context.getAssets(),"fonts/IRANSans_Medium.ttf");
+        font_Bold=Typeface.createFromAsset(ScanActivity.context.getAssets(),"fonts/IRANSans_Bold.ttf");
 
         Scan.setTypeface(font_Bold);
         PhoneTitleUser.setTypeface(font_Bold);
-        RankTitleUser.setTypeface(font_Bold);
         TitlePerson.setTypeface(font_Bold);
-        RankContactTitleUser.setTypeface(font_Bold);
-
         PhoneUser.setTypeface(font_Medium);
-        RankUser.setTypeface(font_Medium);
-        RankBetweenContact.setTypeface(rank_font);
-
+        bottom_navigation_view_linear.setTypeface(font_Medium);
 
         stepView = findViewById(R.id.step_view);
         stepView.setStepsNumber(3);
         stepView.go(2, true);
 
-        bottomNavigationView.setSelectedItemId(R.id.navigation_person);
-        try {
-            if (!FromContactActivity)
-                bottomNavigationView.setVisibility(View.GONE);
-        }
-        catch (Exception e)
-        {
-            bottomNavigationView.setVisibility(View.GONE);
-        }
-
-        try {
-            showContacts();
-        } catch (JSONException e) {
-            try {
-                if (loading.isShowing())
-                    loading.dismiss();
-            }catch (Exception el){
-                el.printStackTrace();
-            }
-            e.printStackTrace();
-        }
 
         PhoneNumber=getSharedPreferences("PREFERENCE",MODE_PRIVATE).getString("PhoneNumber","0");
         PhoneUser.setText(PhoneNumber);
@@ -228,42 +203,37 @@ public class SearchPerson extends AppCompatActivity {
 
         Log.d("LOOOOg", PhoneNumber);
 
-        bottomNavigationView.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
+
+        bottom_navigation_view_linear.setNavigationChangeListener(new BubbleNavigationChangeListener() {
             @Override
-            public boolean onNavigationItemSelected(@NonNull MenuItem menuItem) {
-                if (menuItem.getItemId()==R.id.navigation_contacts)
+            public void onNavigationChanged(View view, int position) {
+                if (view.getId()==R.id.navigation_rank)
                 {
-                    startActivity(new Intent(getBaseContext(), SearchContact.class));
+                    startActivity(new Intent(getBaseContext(), RankActivity.class));
+                    overridePendingTransition(0, 0);
+                    Log.d("looog", String.valueOf(position));
+                    finish();
+                }
+                if (view.getId()==R.id.navigation_fame)
+                {
+                    startActivity(new Intent(getBaseContext(), FameActivity.class));
                     overridePendingTransition(0, 0);
                     finish();
                 }
-                return false;
+                if (view.getId()==R.id.navigation_likeness)
+                {
+                    startActivity(new Intent(getBaseContext(), LikenessActivity.class));
+                    overridePendingTransition(0, 0);
+                    finish();
+                }
+                if (view.getId()==R.id.navigation_contacts)
+                {
+                    startActivity(new Intent(getBaseContext(), ContactActivity.class));
+                    overridePendingTransition(0, 0);
+                    finish();
+                }
             }
         });
-
-        RelativeProgress.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                String number= (String) RankUser.getText();
-                number=number.replace(" %","");
-                if (number.equals("0"))
-                    ActivityDialogShowInformation("مــیـزان مـعروفـیـت","میزان معروفیت شما نا معلوم میباشد. برای محاسبه لطفا روی اسکن مخاطبین کلیک کنید.");
-                else
-                    ActivityDialogShowInformation("مــیـزان مـعروفـیـت","میزان معروفیت شما "+number+" درصد میباشد.");
-            }
-        });
-
-        RelativeImage.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                String number= (String) RankBetweenContact.getText();
-                if (number.equals("0"))
-                    ActivityDialogShowInformation("رتــبـه بـیـن مخــاطبین","رتبه شما بین مخاطبین خود نا معلوم میباشد. برای محاسبه لطفا روی اسکن مخاطبین کلیک کنید.");
-                else
-                    ActivityDialogShowInformation("رتــبـه بـیـن مخــاطبین","شما رتبه "+number+" را در بین مخاطبین خود دارید.");
-            }
-        });
-
 
         Scan.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -277,7 +247,7 @@ public class SearchPerson extends AppCompatActivity {
                 {
                     e.printStackTrace();
                 }
-                loading= new Dialog(SearchPerson.this);
+                loading= new Dialog(ScanActivity.this);
                 loading.requestWindowFeature(Window.FEATURE_NO_TITLE);
                 loading.setContentView(R.layout.loading_dialog);
                 Objects.requireNonNull(loading.getWindow()).setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
@@ -443,43 +413,144 @@ public class SearchPerson extends AppCompatActivity {
                                                                                     if (!isFinishing()) {
                                                                                         try {
                                                                                             try {
-                                                                                                if (loading.isShowing())
-                                                                                                    loading.dismiss();
-                                                                                            }catch (Exception e){
-                                                                                                try {
-                                                                                                    if (loading.isShowing())
-                                                                                                        loading.dismiss();
-                                                                                                }catch (Exception el){
-                                                                                                    el.printStackTrace();
-                                                                                                }
-                                                                                                e.printStackTrace();
-                                                                                            }
-                                                                                            try {
                                                                                                 Log.d("looog", myResponce);
                                                                                                 JSONObject jObject = new JSONObject(myResponce);
                                                                                                 if (TimerIsON)
                                                                                                     ResultTimer.cancel();
 
-                                                                                                String ranking = String.valueOf(jObject.getDouble("rank"));
+                                                                                                ranking = String.valueOf(jObject.getDouble("rank"));
                                                                                                 if (ranking.length() > 6)
                                                                                                     ranking = ranking.substring(0, 6) + " %";
                                                                                                 else
                                                                                                     ranking = ranking + " %";
 
-                                                                                                RankUser.setText(ranking);
+                                                                                                RankActivity.rankingInt = (int) jObject.getDouble("rank");
 
-                                                                                                int rankingInt = (int) jObject.getDouble("rank");
-                                                                                                RankProgressBar.setProgress(rankingInt);
-
-                                                                                                String rankingContact = String.valueOf(jObject.getInt("rankBetweenContact"));
-                                                                                                RankBetweenContact.setText(rankingContact);
+                                                                                                RankActivity.rankingContact = String.valueOf(jObject.getInt("rankBetweenContact"));
 
                                                                                                 ActivityDialogShowSuccess("درخواست شما با موفقیت ثبت شد. شما می توانید نتیجه را مشاهده کنید. ");
                                                                                                 stepView.done(true);
 
                                                                                                 Scan.setText("اسکن مجدد مخاطبین");
 
-                                                                                                bottomNavigationView.setVisibility(View.VISIBLE);
+                                                                                                runOnUiThread(new Runnable() {
+                                                                                                    @Override
+                                                                                                    public void run() {
+                                                                                                        try {
+
+                                                                                                            OkHttpClient client = new OkHttpClient();
+
+                                                                                                            String url = "http://217.218.215.67:6608/api/contacts/similar";
+
+                                                                                                            OkHttpClient.Builder builder = new OkHttpClient.Builder();
+                                                                                                            builder.connectTimeout(15, TimeUnit.SECONDS);
+                                                                                                            builder.readTimeout(15, TimeUnit.SECONDS);
+                                                                                                            builder.writeTimeout(15, TimeUnit.SECONDS);
+
+                                                                                                            Request request = new Request.Builder()
+                                                                                                                    .url(url)
+                                                                                                                    .addHeader("Authorization", Authorization)
+                                                                                                                    .addHeader("Content-Type", "application/json")
+                                                                                                                    .build();
+
+                                                                                                            client = builder.build();
+                                                                                                            client.newCall(request).enqueue(new Callback() {
+
+                                                                                                                @Override
+                                                                                                                public void onFailure(Call call, IOException e) {
+                                                                                                                    runOnUiThread(new Runnable() {
+                                                                                                                        public void run() {
+                                                                                                                            if (!isFinishing()) {
+                                                                                                                                try {
+                                                                                                                                    if (loading.isShowing())
+                                                                                                                                        loading.dismiss();
+                                                                                                                                    if (ActivityDialogInternetConnectionSearchPerson.isShowing())
+                                                                                                                                        ActivityDialogInternetConnectionSearchPerson.dismiss();
+                                                                                                                                } catch (Exception e) {
+                                                                                                                                    try {
+                                                                                                                                        if (loading.isShowing())
+                                                                                                                                            loading.dismiss();
+                                                                                                                                    }catch (Exception el){
+                                                                                                                                        el.printStackTrace();
+                                                                                                                                    }
+                                                                                                                                    e.printStackTrace();
+                                                                                                                                }
+                                                                                                                                ActivityDialogShowInternetConnectionSearchPerson();
+                                                                                                                            }
+                                                                                                                        }
+                                                                                                                    });
+                                                                                                                }
+
+                                                                                                                @Override
+                                                                                                                public void onResponse(Call call, Response response) throws IOException {
+                                                                                                                    if (response.isSuccessful()) {
+                                                                                                                        final String myResponce = response.body().string();
+                                                                                                                        runOnUiThread(new Runnable() {
+                                                                                                                            @Override
+                                                                                                                            public void run() {
+                                                                                                                                if (!isFinishing()) {
+                                                                                                                                    try {
+                                                                                                                                        try {
+                                                                                                                                            if (loading.isShowing())
+                                                                                                                                                loading.dismiss();
+                                                                                                                                        }catch (Exception e){
+                                                                                                                                            try {
+                                                                                                                                                if (loading.isShowing())
+                                                                                                                                                    loading.dismiss();
+                                                                                                                                            }catch (Exception el){
+                                                                                                                                                el.printStackTrace();
+                                                                                                                                            }
+                                                                                                                                            e.printStackTrace();
+                                                                                                                                        }
+                                                                                                                                        try {
+                                                                                                                                            Log.d("looog", myResponce);
+                                                                                                                                            JSONObject jObject = new JSONObject(myResponce);
+
+                                                                                                                                            RankActivity.phoneCommonContact = jObject.getString("phone");
+
+                                                                                                                                            numberCommonContact = String.valueOf(jObject.getDouble("numberCommonContact"));
+                                                                                                                                            if (numberCommonContact.length() > 5)
+                                                                                                                                                numberCommonContact = numberCommonContact.substring(0, 5) + " %";
+                                                                                                                                            else
+                                                                                                                                                numberCommonContact = numberCommonContact + " %";
+
+                                                                                                                                        }catch (Exception e){
+                                                                                                                                            try {
+                                                                                                                                                if (loading.isShowing())
+                                                                                                                                                    loading.dismiss();
+                                                                                                                                            }catch (Exception el){
+                                                                                                                                                el.printStackTrace();
+                                                                                                                                            }
+                                                                                                                                            e.printStackTrace();
+                                                                                                                                        }
+                                                                                                                                    } catch (Exception e) {
+                                                                                                                                        try {
+                                                                                                                                            if (loading.isShowing())
+                                                                                                                                                loading.dismiss();
+                                                                                                                                        }catch (Exception el){
+                                                                                                                                            el.printStackTrace();
+                                                                                                                                        }
+                                                                                                                                        e.printStackTrace();
+                                                                                                                                    }
+                                                                                                                                }
+                                                                                                                            }
+                                                                                                                        });
+                                                                                                                    }
+                                                                                                                }
+                                                                                                            });
+                                                                                                        }catch (Exception e)
+                                                                                                        {
+                                                                                                            try {
+                                                                                                                if (loading.isShowing())
+                                                                                                                    loading.dismiss();
+                                                                                                            }catch (Exception el){
+                                                                                                                el.printStackTrace();
+                                                                                                            }
+                                                                                                            e.printStackTrace();
+                                                                                                        }
+                                                                                                    }
+                                                                                                });
+
                                                                                             }catch (Exception e){
                                                                                                 try {
                                                                                                 if (loading.isShowing())
@@ -667,11 +738,11 @@ public class SearchPerson extends AppCompatActivity {
         if (requestCode == PERMISSIONS_REQUEST_READ_CONTACTS) {
             if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 // Permission is granted
-                Toast.makeText(this, "برای نمایش مهم ترین مخاطب لطفا روی اسکن مخاطبین کلیک کنید", Toast.LENGTH_LONG).show();
+                Toast.makeText(this, "برای نمایش مهم ترین مخاطبین لطفا روی اسکن مخاطبین کلیک کنید", Toast.LENGTH_LONG).show();
                 getSharedPreferences("PREFERENCE",MODE_PRIVATE).edit().putBoolean("ispermission",true).apply();
 
             } else {
-                Toast.makeText(this, "برای نمایش مهم ترین مخاطب لازم است دسترسی به مخاطبین داده شود", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "برای نمایش مهم ترین مخاطبین لازم است دسترسی به مخاطبین داده شود", Toast.LENGTH_SHORT).show();
                 getSharedPreferences("PREFERENCE",MODE_PRIVATE).edit().putBoolean("ispermission",false).apply();
             }
         }
@@ -801,13 +872,9 @@ public class SearchPerson extends AppCompatActivity {
     public static String charRemoveAt(String str, int p) {
         return str.substring(0, p) + str.substring(p + 1);
     }
-    @Override
-    public void onBackPressed() {
-        ActivityDialogShowExitSearch();
-    }
     public void ActivityDialogShowSuccess(String Text)
     {
-        ActivityDialogSuccess=new Dialog(SearchPerson.this);
+        ActivityDialogSuccess=new Dialog(ScanActivity.this);
         ActivityDialogSuccess.requestWindowFeature(Window.FEATURE_NO_TITLE);
         Objects.requireNonNull(ActivityDialogSuccess.getWindow()).setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
 
@@ -826,7 +893,7 @@ public class SearchPerson extends AppCompatActivity {
     }
     public void ActivityDialogShowInformation(String Title, String Text)
     {
-        ActivityDialogInformation=new Dialog(SearchPerson.this);
+        ActivityDialogInformation=new Dialog(ScanActivity.this);
         ActivityDialogInformation.requestWindowFeature(Window.FEATURE_NO_TITLE);
         Objects.requireNonNull(ActivityDialogInformation.getWindow()).setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
 
@@ -847,7 +914,7 @@ public class SearchPerson extends AppCompatActivity {
     }
     public void ActivityDialogShowError(String TextError,boolean GoToFirst)
     {
-        ActivityDialogError=new Dialog(SearchPerson.this);
+        ActivityDialogError=new Dialog(ScanActivity.this);
         ActivityDialogError.requestWindowFeature(Window.FEATURE_NO_TITLE);
         Objects.requireNonNull(ActivityDialogError.getWindow()).setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
 
@@ -869,8 +936,8 @@ public class SearchPerson extends AppCompatActivity {
                 if (GoToFirst)
                 {
                     getSharedPreferences("PREFERENCE",MODE_PRIVATE).edit().putBoolean("currentUser",false).apply();
-                    ActivityOptions options = ActivityOptions.makeSceneTransitionAnimation(SearchPerson.this);
-                    Intent intent = new Intent(SearchPerson.this, Authentication.class);
+                    ActivityOptions options = ActivityOptions.makeSceneTransitionAnimation(ScanActivity.this);
+                    Intent intent = new Intent(ScanActivity.this, Authentication.class);
                     startActivity(intent, options.toBundle());
                     finish();
                 }
@@ -881,7 +948,7 @@ public class SearchPerson extends AppCompatActivity {
     }
     public void ActivityDialogShowInternetConnectionSearchPerson()
     {
-        ActivityDialogInternetConnectionSearchPerson=new Dialog(SearchPerson.this);
+        ActivityDialogInternetConnectionSearchPerson=new Dialog(ScanActivity.this);
         ActivityDialogInternetConnectionSearchPerson.requestWindowFeature(Window.FEATURE_NO_TITLE);
         Objects.requireNonNull(ActivityDialogInternetConnectionSearchPerson.getWindow()).setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
 
@@ -896,9 +963,13 @@ public class SearchPerson extends AppCompatActivity {
 
         ActivityDialogInternetConnectionSearchPerson.show();
     }
+    @Override
+    public void onBackPressed() {
+        ActivityDialogShowExitSearch();
+    }
     public void ActivityDialogShowExitSearch()
     {
-        ActivityDialogExitSearch=new Dialog(SearchPerson.this);
+        ActivityDialogExitSearch=new Dialog(ScanActivity.this);
         ActivityDialogExitSearch.requestWindowFeature(Window.FEATURE_NO_TITLE);
         Objects.requireNonNull(ActivityDialogExitSearch.getWindow()).setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
 
@@ -918,7 +989,7 @@ public class SearchPerson extends AppCompatActivity {
         ExitYes.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(SearchPerson.this, "خروج", Toast.LENGTH_SHORT).show();
+                Toast.makeText(ScanActivity.this, "خروج", Toast.LENGTH_SHORT).show();
                 ActivityDialogExitSearch.dismiss();
                 finishAffinity();
             }
@@ -1013,36 +1084,149 @@ public class SearchPerson extends AppCompatActivity {
                                             if (ReqStatus==1)
                                             {
                                                 try {
-                                                    if (TimerIsON)
-                                                        ResultTimer.cancel();
 
-                                                    try {
-                                                        if (loading.isShowing())
-                                                            loading.dismiss();
-                                                    } catch (Exception e) {
-                                                        e.printStackTrace();
-                                                    }
-
-                                                    String ranking = String.valueOf(jObject.getDouble("rank"));
+                                                   ranking = String.valueOf(jObject.getDouble("rank"));
                                                     if (ranking.length() > 6)
                                                         ranking = ranking.substring(0, 6) + " %";
                                                     else
                                                         ranking = ranking + " %";
 
-                                                    RankUser.setText(ranking);
 
-                                                    int rankingInt = (int) jObject.getDouble("rank");
-                                                    RankProgressBar.setProgress(rankingInt);
+                                                    RankActivity.rankingInt = (int) jObject.getDouble("rank");
 
-                                                    String rankingContact = String.valueOf(jObject.getInt("rankBetweenContact"));
-                                                    RankBetweenContact.setText(rankingContact);
+                                                    RankActivity.rankingContact = String.valueOf(jObject.getInt("rankBetweenContact"));
 
                                                     ActivityDialogShowSuccess("درخواست شما با موفقیت ثبت شد. شما می توانید نتیجه را مشاهده کنید. ");
                                                     stepView.done(true);
 
                                                     Scan.setText("اسکن مجدد مخاطبین");
 
-                                                    bottomNavigationView.setVisibility(View.VISIBLE);
+
+                                                    runOnUiThread(new Runnable() {
+                                                        @Override
+                                                        public void run() {
+                                                            try {
+
+                                                                OkHttpClient client = new OkHttpClient();
+
+                                                                String url = "http://217.218.215.67:6608/api/contacts/similar";
+
+                                                                OkHttpClient.Builder builder = new OkHttpClient.Builder();
+                                                                builder.connectTimeout(15, TimeUnit.SECONDS);
+                                                                builder.readTimeout(15, TimeUnit.SECONDS);
+                                                                builder.writeTimeout(15, TimeUnit.SECONDS);
+
+                                                                Request request = new Request.Builder()
+                                                                        .url(url)
+                                                                        .addHeader("Authorization", Authorization)
+                                                                        .addHeader("Content-Type", "application/json")
+                                                                        .build();
+
+                                                                client = builder.build();
+                                                                client.newCall(request).enqueue(new Callback() {
+
+                                                                    @Override
+                                                                    public void onFailure(Call call, IOException e) {
+                                                                        runOnUiThread(new Runnable() {
+                                                                            public void run() {
+                                                                                if (!isFinishing()) {
+                                                                                    try {
+                                                                                        if (loading.isShowing())
+                                                                                            loading.dismiss();
+                                                                                        if (ActivityDialogInternetConnectionSearchPerson.isShowing())
+                                                                                            ActivityDialogInternetConnectionSearchPerson.dismiss();
+                                                                                    } catch (Exception e) {
+                                                                                        try {
+                                                                                            if (loading.isShowing())
+                                                                                                loading.dismiss();
+                                                                                        }catch (Exception el){
+                                                                                            el.printStackTrace();
+                                                                                        }
+                                                                                        e.printStackTrace();
+                                                                                    }
+                                                                                    ActivityDialogShowInternetConnectionSearchPerson();
+                                                                                }
+                                                                            }
+                                                                        });
+                                                                    }
+
+                                                                    @Override
+                                                                    public void onResponse(Call call, Response response) throws IOException {
+                                                                        if (response.isSuccessful()) {
+                                                                            final String myResponce = response.body().string();
+                                                                            runOnUiThread(new Runnable() {
+                                                                                @Override
+                                                                                public void run() {
+                                                                                    if (!isFinishing()) {
+                                                                                        try {
+                                                                                            try {
+                                                                                                if (TimerIsON)
+                                                                                                    ResultTimer.cancel();
+
+                                                                                                try {
+                                                                                                    if (loading.isShowing())
+                                                                                                        loading.dismiss();
+                                                                                                } catch (Exception e) {
+                                                                                                    e.printStackTrace();
+                                                                                                }
+                                                                                            }catch (Exception e){
+                                                                                                try {
+                                                                                                    if (loading.isShowing())
+                                                                                                        loading.dismiss();
+                                                                                                }catch (Exception el){
+                                                                                                    el.printStackTrace();
+                                                                                                }
+                                                                                                e.printStackTrace();
+                                                                                            }
+                                                                                            try {
+                                                                                                Log.d("looog", myResponce);
+                                                                                                JSONObject jObject = new JSONObject(myResponce);
+
+                                                                                                RankActivity.phoneCommonContact = jObject.getString("phone");
+
+                                                                                                numberCommonContact = String.valueOf(jObject.getDouble("numberCommonContact"));
+                                                                                                if (numberCommonContact.length() > 5)
+                                                                                                    numberCommonContact = numberCommonContact.substring(0, 5) + " %";
+                                                                                                else
+                                                                                                    numberCommonContact = numberCommonContact + " %";
+
+                                                                                            }catch (Exception e){
+                                                                                                try {
+                                                                                                    if (loading.isShowing())
+                                                                                                        loading.dismiss();
+                                                                                                }catch (Exception el){
+                                                                                                    el.printStackTrace();
+                                                                                                }
+                                                                                                e.printStackTrace();
+                                                                                            }
+                                                                                        } catch (Exception e) {
+                                                                                            try {
+                                                                                                if (loading.isShowing())
+                                                                                                    loading.dismiss();
+                                                                                            }catch (Exception el){
+                                                                                                el.printStackTrace();
+                                                                                            }
+                                                                                            e.printStackTrace();
+                                                                                        }
+                                                                                    }
+                                                                                }
+                                                                            });
+                                                                        }
+                                                                    }
+                                                                });
+                                                            }catch (Exception e)
+                                                            {
+                                                                try {
+                                                                    if (loading.isShowing())
+                                                                        loading.dismiss();
+                                                                }catch (Exception el){
+                                                                    el.printStackTrace();
+                                                                }
+                                                                e.printStackTrace();
+                                                            }
+                                                        }
+                                                    });
+
                                                 }catch (Exception e){
                                                     e.printStackTrace();
                                                 }
@@ -1156,7 +1340,7 @@ public class SearchPerson extends AppCompatActivity {
     void OnStartSearchPerson() {
         try {
 
-            loading = new Dialog(SearchPerson.this);
+            loading = new Dialog(ScanActivity.this);
             loading.requestWindowFeature(Window.FEATURE_NO_TITLE);
             loading.setContentView(R.layout.loading_dialog);
             Objects.requireNonNull(loading.getWindow()).setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
@@ -1241,43 +1425,146 @@ public class SearchPerson extends AppCompatActivity {
                                         int ReqStatus = jObject.getInt("reqStatus");
 
                                         if (ReqStatus == 1) {
+
                                             try
                                             {
-                                                if (loading.isShowing())
-                                                    loading.dismiss();
-                                                if (TimerIsON)
-                                                    ResultTimer.cancel();
-                                            }catch (Exception e)
-                                            {
-                                                try {
-                                                    if (loading.isShowing())
-                                                        loading.dismiss();
-                                                }catch (Exception el){
-                                                    el.printStackTrace();
-                                                }
-                                                e.printStackTrace();
-                                            }
-                                            try
-                                            {
-                                                String ranking = String.valueOf(jObject.getDouble("rank"));
+                                                ranking = String.valueOf(jObject.getDouble("rank"));
                                                 if (ranking.length() > 6)
                                                     ranking = ranking.substring(0, 6) + " %";
                                                 else
                                                     ranking = ranking + " %";
 
-                                                RankUser.setText(ranking);
 
-                                                int rankingInt = (int) jObject.getDouble("rank");
-                                                RankProgressBar.setProgress(rankingInt);
+                                                RankActivity.rankingInt = (int) jObject.getDouble("rank");
 
-                                                String rankingContact = String.valueOf(jObject.getInt("rankBetweenContact"));
-                                                RankBetweenContact.setText(rankingContact);
+                                                RankActivity.rankingContact = String.valueOf(jObject.getInt("rankBetweenContact"));
 
                                                 stepView.done(true);
 
                                                 Scan.setText("اسکن مجدد مخاطبین");
 
-                                                bottomNavigationView.setVisibility(View.VISIBLE);
+                                                runOnUiThread(new Runnable() {
+                                                    @Override
+                                                    public void run() {
+                                                        try {
+
+                                                            OkHttpClient client = new OkHttpClient();
+
+                                                            String url = "http://217.218.215.67:6608/api/contacts/similar";
+
+                                                            OkHttpClient.Builder builder = new OkHttpClient.Builder();
+                                                            builder.connectTimeout(15, TimeUnit.SECONDS);
+                                                            builder.readTimeout(15, TimeUnit.SECONDS);
+                                                            builder.writeTimeout(15, TimeUnit.SECONDS);
+
+                                                            Request request = new Request.Builder()
+                                                                    .url(url)
+                                                                    .addHeader("Authorization", Authorization)
+                                                                    .addHeader("Content-Type", "application/json")
+                                                                    .build();
+
+                                                            client = builder.build();
+                                                            client.newCall(request).enqueue(new Callback() {
+
+                                                                @Override
+                                                                public void onFailure(Call call, IOException e) {
+                                                                    runOnUiThread(new Runnable() {
+                                                                        public void run() {
+                                                                            if (!isFinishing()) {
+                                                                                try {
+                                                                                    if (loading.isShowing())
+                                                                                        loading.dismiss();
+                                                                                    if (ActivityDialogInternetConnectionSearchPerson.isShowing())
+                                                                                        ActivityDialogInternetConnectionSearchPerson.dismiss();
+                                                                                } catch (Exception e) {
+                                                                                    try {
+                                                                                        if (loading.isShowing())
+                                                                                            loading.dismiss();
+                                                                                    }catch (Exception el){
+                                                                                        el.printStackTrace();
+                                                                                    }
+                                                                                    e.printStackTrace();
+                                                                                }
+                                                                                ActivityDialogShowInternetConnectionSearchPerson();
+                                                                            }
+                                                                        }
+                                                                    });
+                                                                }
+
+                                                                @Override
+                                                                public void onResponse(Call call, Response response) throws IOException {
+                                                                    if (response.isSuccessful()) {
+                                                                        final String myResponce = response.body().string();
+                                                                        runOnUiThread(new Runnable() {
+                                                                            @Override
+                                                                            public void run() {
+                                                                                if (!isFinishing()) {
+                                                                                    try {
+                                                                                        try
+                                                                                        {
+                                                                                            if (loading.isShowing())
+                                                                                                loading.dismiss();
+                                                                                            if (TimerIsON)
+                                                                                                ResultTimer.cancel();
+                                                                                        }catch (Exception e)
+                                                                                        {
+                                                                                            try {
+                                                                                                if (loading.isShowing())
+                                                                                                    loading.dismiss();
+                                                                                            }catch (Exception el){
+                                                                                                el.printStackTrace();
+                                                                                            }
+                                                                                            e.printStackTrace();
+                                                                                        }
+                                                                                        try {
+                                                                                            Log.d("looog", myResponce);
+                                                                                            JSONObject jObject = new JSONObject(myResponce);
+
+                                                                                            RankActivity.phoneCommonContact = jObject.getString("phone");
+
+                                                                                            numberCommonContact = String.valueOf(jObject.getDouble("numberCommonContact"));
+                                                                                            if (numberCommonContact.length() > 5)
+                                                                                                numberCommonContact = numberCommonContact.substring(0, 5) + " %";
+                                                                                            else
+                                                                                                numberCommonContact = numberCommonContact + " %";
+
+                                                                                        }catch (Exception e){
+                                                                                            try {
+                                                                                                if (loading.isShowing())
+                                                                                                    loading.dismiss();
+                                                                                            }catch (Exception el){
+                                                                                                el.printStackTrace();
+                                                                                            }
+                                                                                            e.printStackTrace();
+                                                                                        }
+                                                                                    } catch (Exception e) {
+                                                                                        try {
+                                                                                            if (loading.isShowing())
+                                                                                                loading.dismiss();
+                                                                                        }catch (Exception el){
+                                                                                            el.printStackTrace();
+                                                                                        }
+                                                                                        e.printStackTrace();
+                                                                                    }
+                                                                                }
+                                                                            }
+                                                                        });
+                                                                    }
+                                                                }
+                                                            });
+                                                        }catch (Exception e)
+                                                        {
+                                                            try {
+                                                                if (loading.isShowing())
+                                                                    loading.dismiss();
+                                                            }catch (Exception el){
+                                                                el.printStackTrace();
+                                                            }
+                                                            e.printStackTrace();
+                                                        }
+                                                    }
+                                                });
+
                                             }
                                             catch (Exception e)
                                             {
@@ -1412,5 +1699,33 @@ public class SearchPerson extends AppCompatActivity {
             }
             e.printStackTrace();
         }
+    }
+    public void Guide()
+    {
+        TapTargetView.showFor(ScanActivity.this,
+                TapTarget.forView(findViewById(R.id.navigation_scan), "اسکن مخاطبین", "زمانی که خواستید مخاطبین خود را اسکن کنید و یا اطلاعات اسکن خود را به روز کنید کافیست به این قسمت مراجعه کنید و روی گزینه اسکن مخاطبین کلیک کنید")
+                        .outerCircleColor(R.color.scanCircle)
+                        .outerCircleAlpha(0.96f)
+                        .targetCircleColor(R.color.scantargetCircle)
+                        .titleTextSize(20)
+                        .titleTextColor(R.color.cardViewBackground)
+                        .descriptionTextSize(15)
+                        .descriptionTextColor(R.color.cardViewBackground)
+                        .textColor(R.color.cardViewBackground)
+                        .textTypeface(font_Medium)
+                        .dimColor(R.color.black)
+                        .drawShadow(true)
+                        .cancelable(false)
+                        .tintTarget(true)
+                        .transparentTarget(false)
+                        .targetRadius(60),
+                new TapTargetView.Listener() {
+                    @Override
+                    public void onTargetClick(TapTargetView view) {
+                        super.onTargetClick(view);
+                        BubbleToggleView bubbleToggleView = (BubbleToggleView)findViewById(R.id.navigation_fame);
+                        bottom_navigation_view_linear.onClick(bubbleToggleView);
+                    }
+                });
     }
 }

@@ -1,30 +1,36 @@
 package com.example.sina.specificcontact;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.provider.ContactsContract;
-import android.support.annotation.NonNull;
-import android.support.design.widget.BottomNavigationView;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.gauravk.bubblenavigation.BubbleNavigationLinearView;
+import com.gauravk.bubblenavigation.listener.BubbleNavigationChangeListener;
+import com.getkeepsafe.taptargetview.TapTarget;
+import com.getkeepsafe.taptargetview.TapTargetView;
 import com.shuhart.stepview.StepView;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
@@ -37,9 +43,7 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 
-import static com.example.sina.specificcontact.SearchPerson.FromContactActivity;
-
-public class SearchContact extends AppCompatActivity {
+public class ContactActivity extends AppCompatActivity {
 
      TextView NameTitleOne;
      TextView NameOne;
@@ -78,7 +82,7 @@ public class SearchContact extends AppCompatActivity {
 
     static Context context;
 
-    BottomNavigationView bottomNavigationView;
+    BubbleNavigationLinearView bottom_navigation_view_linear;
 
     public static Dialog ActivityDialogInternetConnectionSearchContact;
     public static Dialog ActivityDialogInformationSearchContact;
@@ -90,7 +94,26 @@ public class SearchContact extends AppCompatActivity {
         super.onStart();
 
         try {
-            getResultSearchContact();
+            final Handler handler = new Handler();
+            handler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        boolean GuideDone = getSharedPreferences("PREFERENCE",MODE_PRIVATE).getBoolean("guidedone",false);
+                        if (!GuideDone)
+                            Guide();
+                        else
+                        {
+                            showContacts();
+                            getResultSearchContact();
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        e.printStackTrace();
+                    }
+                }
+            }, 500);
         }catch (Exception e)
         {
             e.printStackTrace();
@@ -100,7 +123,7 @@ public class SearchContact extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_search_contact);
+        setContentView(R.layout.activity_contact);
 
         context=getApplicationContext();
 
@@ -131,10 +154,10 @@ public class SearchContact extends AppCompatActivity {
 
         TitleContact=(TextView)findViewById(R.id.titleContact);
 
-        bottomNavigationView=(BottomNavigationView) findViewById(R.id.bottom_navigation_view);
+        bottom_navigation_view_linear=(BubbleNavigationLinearView) findViewById(R.id.bottom_navigation_view_linear);
 
-        font_Medium= Typeface.createFromAsset(SearchPerson.context.getAssets(),"fonts/IRANSans_Medium.ttf");
-        font_Bold=Typeface.createFromAsset(SearchPerson.context.getAssets(),"fonts/IRANSans_Bold.ttf");
+        font_Medium= Typeface.createFromAsset(ContactActivity.context.getAssets(),"fonts/IRANSans_Medium.ttf");
+        font_Bold=Typeface.createFromAsset(ContactActivity.context.getAssets(),"fonts/IRANSans_Bold.ttf");
 
         NameTitleOne.setTypeface(font_Bold);
         NameOne.setTypeface(font_Medium);
@@ -160,7 +183,7 @@ public class SearchContact extends AppCompatActivity {
         NameFive.setTypeface(font_Medium);
         PhoneTitleFive.setTypeface(font_Bold);
         PhoneFive.setTypeface(font_Medium);
-
+        bottom_navigation_view_linear.setTypeface(font_Medium);
         TitleContact.setTypeface(font_Bold);
 
         stepView=(StepView)findViewById(R.id.step_view);
@@ -170,19 +193,35 @@ public class SearchContact extends AppCompatActivity {
         stepView.go(2, true);
         stepView.done(true);
 
-        bottomNavigationView.setSelectedItemId(R.id.navigation_contacts);
 
-        bottomNavigationView.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
+        bottom_navigation_view_linear.setNavigationChangeListener(new BubbleNavigationChangeListener() {
             @Override
-            public boolean onNavigationItemSelected(@NonNull MenuItem menuItem) {
-                if (menuItem.getItemId()==R.id.navigation_person)
+            public void onNavigationChanged(View view, int position) {
+
+                if (view.getId()==R.id.navigation_scan)
                 {
-                    FromContactActivity=true;
-                    startActivity(new Intent(getBaseContext(), SearchPerson.class));
+                    startActivity(new Intent(getBaseContext(), ScanActivity.class));
                     overridePendingTransition(0, 0);
                     finish();
                 }
-                return false;
+                if (view.getId()==R.id.navigation_rank)
+                {
+                    startActivity(new Intent(getBaseContext(), RankActivity.class));
+                    overridePendingTransition(0, 0);
+                    finish();
+                }
+                if (view.getId()==R.id.navigation_fame)
+                {
+                    startActivity(new Intent(getBaseContext(), FameActivity.class));
+                    overridePendingTransition(0, 0);
+                    finish();
+                }
+                if (view.getId()==R.id.navigation_likeness)
+                {
+                    startActivity(new Intent(getBaseContext(), LikenessActivity.class));
+                    overridePendingTransition(0, 0);
+                    finish();
+                }
             }
         });
     }
@@ -194,7 +233,7 @@ public class SearchContact extends AppCompatActivity {
 
     public void ActivityDialogShowInternetConnectionSearchContact()
     {
-        ActivityDialogInternetConnectionSearchContact=new Dialog(SearchContact.this);
+        ActivityDialogInternetConnectionSearchContact=new Dialog(ContactActivity.this);
         ActivityDialogInternetConnectionSearchContact.requestWindowFeature(Window.FEATURE_NO_TITLE);
         Objects.requireNonNull(ActivityDialogInternetConnectionSearchContact.getWindow()).setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
 
@@ -211,7 +250,7 @@ public class SearchContact extends AppCompatActivity {
     }
     public void ActivityDialogShowInformation(String Title,String Text)
     {
-        ActivityDialogInformationSearchContact=new Dialog(SearchContact.this);
+        ActivityDialogInformationSearchContact=new Dialog(ContactActivity.this);
         ActivityDialogInformationSearchContact.requestWindowFeature(Window.FEATURE_NO_TITLE);
         Objects.requireNonNull(ActivityDialogInformationSearchContact.getWindow()).setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
 
@@ -231,7 +270,7 @@ public class SearchContact extends AppCompatActivity {
     }
     public void ActivityDialogShowError(String TextError)
     {
-        ActivityDialogErrorSearchContact=new Dialog(SearchContact.this);
+        ActivityDialogErrorSearchContact=new Dialog(ContactActivity.this);
         ActivityDialogErrorSearchContact.requestWindowFeature(Window.FEATURE_NO_TITLE);
         Objects.requireNonNull(ActivityDialogErrorSearchContact.getWindow()).setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
 
@@ -250,7 +289,7 @@ public class SearchContact extends AppCompatActivity {
     }
     public void ActivityDialogShowExitSearchContact()
     {
-        ActivityDialogExitSearchContact=new Dialog(SearchContact.this);
+        ActivityDialogExitSearchContact=new Dialog(ContactActivity.this);
         ActivityDialogExitSearchContact.requestWindowFeature(Window.FEATURE_NO_TITLE);
         Objects.requireNonNull(ActivityDialogExitSearchContact.getWindow()).setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
 
@@ -270,7 +309,7 @@ public class SearchContact extends AppCompatActivity {
         ExitYes.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(SearchContact.this, "خروج", Toast.LENGTH_SHORT).show();
+                Toast.makeText(ContactActivity.this, "خروج", Toast.LENGTH_SHORT).show();
                 ActivityDialogExitSearchContact.dismiss();
                 finishAffinity();
             }
@@ -319,7 +358,7 @@ public class SearchContact extends AppCompatActivity {
         {
             e.printStackTrace();
         }
-        loading= new Dialog(SearchContact.this);
+        loading= new Dialog(ContactActivity.this);
         loading.requestWindowFeature(Window.FEATURE_NO_TITLE);
         loading.setContentView(R.layout.loading_dialog);
         Objects.requireNonNull(loading.getWindow()).setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
@@ -501,6 +540,7 @@ public class SearchContact extends AppCompatActivity {
 
                                             NameFive.setText(NameofContact);
                                             PhoneFive.setText("0"+phone);
+
                                         }catch (Exception e){
                                             e.printStackTrace();
                                         }
@@ -539,7 +579,109 @@ public class SearchContact extends AppCompatActivity {
                         }
                     });
                 }
+                else {
+                    if (!isFinishing()) {
+                        try {
+
+                            Log.d("looog", myResponce);
+
+                            JSONObject jObject = new JSONObject(myResponce);
+
+                            int ErrorCode = jObject.getInt("code");
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    try {
+                                        if (loading.isShowing())
+                                            loading.dismiss();
+                                    }catch (Exception e){
+                                        try {
+                                            if (loading.isShowing())
+                                                loading.dismiss();
+                                        }catch (Exception el){
+                                            el.printStackTrace();
+                                        }
+                                        e.printStackTrace();
+                                    }
+                                    if (ErrorCode == 4030) {
+                                        ActivityDialogShowError("درخواست شما ارسال نشد. برای مشاهده مهمترین مخاطب لطفا تعداد مخاطبین خود را افزایش داده و سپس روی گزینه اسکن مخاطبین کلیک کنید. ");
+                                    } else if (ErrorCode == 4001) {
+                                        ActivityDialogShowError("درخواست شما ارسال نشد. مشکلی در ثبت شماره شما در سرور به وجود آمده است و برای رفع آن باید شماره ی خود را دوباره تأیید کنید. ");
+                                    } else if (ErrorCode == 4002) {
+                                        ActivityDialogShowError("درخواست شما ارسال نشد. مدت زمان زیادی درخواستی از جانب شما ارسال نشده است و برای رفع آن باید شماره ی خود را دوباره تأیید کنید. ");
+                                    } else if (ErrorCode == 4008) {
+                                        ActivityDialogShowError("درخواست شما ارسال نشد. مشکلی در شماره برخی از مخاطبین شما وجود دارد که خواندن آن با مشکل مواجه شده است. ");
+                                    } else if (ErrorCode == 4041) {
+                                        ActivityDialogShowInformation("درخـــواستــی ارســـال نــشده", "درخواستی از جانب شما ارسال نشده است. برای مشاهده مهمترین مخاطب لطفا روی گزینه اسکن مخاطبین کلیک کنید. ");
+                                    } else if (ErrorCode == 4040) {
+                                        ActivityDialogShowInformation("درخـواست قـبـلا ارسـال شـده", "درخواست از جانب شما قبلا ارسال شده است. برای ارسال درخواست جدید باید تغییری در مخاطبین شما به وجود آید. ");
+                                    } else {
+                                        ActivityDialogShowError("درخواست شما ارسال نشد. علت این ناموفقیت نامشخص است. ");
+                                    }
+                                }
+                            });
+                        } catch (Exception e) {
+                            try {
+                                if (loading.isShowing())
+                                    loading.dismiss();
+                            }catch (Exception el){
+                                el.printStackTrace();
+                            }
+                            e.printStackTrace();
+                        }
+                    }
+                }
             }
         });
+    }
+    private void showContacts() throws JSONException {
+        // Check the SDK version and whether the permission is already granted or not.
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && checkSelfPermission(Manifest.permission.READ_CONTACTS) != PackageManager.PERMISSION_GRANTED) {
+            requestPermissions(new String[]{Manifest.permission.READ_CONTACTS}, 100);
+            //After this point you wait for callback in onRequestPermissionsResult(int, String[], int[]) overriden method
+        }
+    }
+
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        if (requestCode == 100) {
+            if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                // Permission is granted
+                getSharedPreferences("PREFERENCE",MODE_PRIVATE).edit().putBoolean("ispermission",true).apply();
+
+            } else {
+                Toast.makeText(this, "برای نمایش مهم ترین مخاطبین لازم است دسترسی به مخاطبین داده شود", Toast.LENGTH_SHORT).show();
+                getSharedPreferences("PREFERENCE",MODE_PRIVATE).edit().putBoolean("ispermission",false).apply();
+            }
+        }
+    }
+    public void Guide()
+    {
+        TapTargetView.showFor(ContactActivity.this,
+                TapTarget.forView(findViewById(R.id.navigation_contacts), "رتبه بندی مخاطبین",  "تا به حال به این فکر افتاده\u200Cاید که کدام یک از مخاطبین شما از همه معروفــتر و مهمــتر است؟؟؟"+"\n"+
+                        "در این قسمت می\u200Cتوانید رتبه بندی مخاطبین خود را بر اساس میزان معروفیت مشاهده کنید")
+                        .outerCircleColor(R.color.contactsCircle)
+                        .outerCircleAlpha(0.96f)
+                        .targetCircleColor(R.color.contactstargetCircle)
+                        .titleTextSize(20)
+                        .titleTextColor(R.color.cardViewBackground)
+                        .descriptionTextSize(15)
+                        .descriptionTextColor(R.color.cardViewBackground)
+                        .textColor(R.color.cardViewBackground)
+                        .textTypeface(font_Medium)
+                        .dimColor(R.color.black)
+                        .drawShadow(true)
+                        .cancelable(false)
+                        .tintTarget(true)
+                        .transparentTarget(false)
+                        .targetRadius(60),
+                new TapTargetView.Listener() {
+                    @Override
+                    public void onTargetClick(TapTargetView view) {
+                        super.onTargetClick(view);
+                        getSharedPreferences("PREFERENCE",MODE_PRIVATE).edit().putBoolean("guidedone",true).apply();
+                    }
+                });
     }
 }

@@ -1,9 +1,11 @@
 package com.example.sina.specificcontact;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.graphics.drawable.ColorDrawable;
@@ -14,6 +16,8 @@ import android.os.Handler;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.support.annotation.RequiresApi;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.transition.Slide;
@@ -178,6 +182,32 @@ public class Authentication extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 ActivityDialogShowChangePhone();
+            }
+        });
+
+        CheckPermissionAndStartIntent();
+
+        SmsReceiver.bindListener(new SmsListener() {
+            @Override
+            public void onMessageReceived(String messageText) {
+                try {
+                    if (!isFinishing())
+                    {
+                        Log.d("Text",messageText);
+                        if (messageText.contains("شهرت سنج") || messageText.contains("مخاطب خاص"))
+                        {
+                            String CodeFromMessage= messageText.replaceAll("[^0-9]", "");
+                            Log.d("Text",CodeFromMessage);
+
+                            verifyCodeET.setText(CodeFromMessage);
+
+                            verifyCodeButton.callOnClick();
+                        }
+                    }
+                }catch (Exception e)
+                {
+                    e.printStackTrace();
+                }
             }
         });
 
@@ -455,7 +485,7 @@ public class Authentication extends AppCompatActivity {
                                                             public void run() {
 
                                                                 loading.dismiss();
-                                                                startActivity(new Intent(Authentication.this, SearchPerson.class));
+                                                                startActivity(new Intent(Authentication.this, RankActivity.class));
                                                                 finish();
                                                             }
                                                         },4000);
@@ -732,5 +762,15 @@ public class Authentication extends AppCompatActivity {
     @Override
     public void onBackPressed() {
         ActivityDialogShowExit();
+    }
+
+    private void CheckPermissionAndStartIntent() {
+        if (ContextCompat.checkSelfPermission(Authentication.this, Manifest.permission.RECEIVE_SMS) != PackageManager.PERMISSION_GRANTED || ContextCompat.checkSelfPermission(Authentication.this, Manifest.permission.RECEIVE_SMS) == PackageManager.PERMISSION_DENIED) {
+            ActivityCompat.requestPermissions(Authentication.this, new String[]{Manifest.permission.RECEIVE_SMS}, 2);
+            Log.d("loooog", "1");
+        } else {
+            Log.d("loooog", "2");
+
+        }
     }
 }

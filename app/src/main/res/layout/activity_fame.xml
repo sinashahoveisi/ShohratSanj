@@ -1,0 +1,222 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/backgroundMainCardView"
+    tools:context=".ScanActivity">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:id="@+id/first"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:background="@color/colorPrimary">
+            <com.shuhart.stepview.StepView
+                android:id="@+id/step_view"
+                android:layout_width="209dp"
+                android:layout_height="37dp"
+                android:layout_marginBottom="8dp"
+                android:layout_marginTop="8dp"
+                android:padding="16dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintHorizontal_bias="0.0"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintVertical_bias="0.0"
+                app:sv_animationType="All"
+                app:sv_stepPadding="12dp"
+                app:sv_steps="@array/steps"
+                app:sv_typeface="@font/iran_sans_mobile" />
+        </LinearLayout>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:paddingTop="30dp"
+            android:paddingBottom="20dp"
+            android:background="@drawable/title_bg"
+            android:orientation="horizontal">
+
+            <com.uncopt.android.widget.text.justify.JustifiedTextView
+                android:id="@+id/titleFame"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="مــعــروفــیــت"
+                android:textColor="#ffffff"
+                android:textSize="15sp"
+                android:textAlignment="center"
+                android:gravity="center" />
+
+        </LinearLayout>
+
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:layout_marginBottom="90dp"
+            android:orientation="vertical">
+
+
+            <LinearLayout
+                android:id="@+id/subtitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:orientation="vertical">
+
+
+                <RelativeLayout
+                    android:id="@+id/RelativeProgress"
+                    android:layout_width="250dp"
+                    android:layout_height="250dp"
+                    android:gravity="center">
+
+                    <ProgressBar
+                        android:id="@+id/RankProgressBar"
+                        style="?android:attr/progressBarStyleHorizontal"
+                        android:padding="-150dp"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:indeterminate="false"
+                        android:max="100"
+                        android:progress="0"
+                        android:progressDrawable="@drawable/custom_progressbar_drawable"
+                        android:secondaryProgress="100" />
+
+                    <TextView
+                        android:id="@+id/RankUser"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:text="0 %"
+                        android:layout_centerInParent="true"
+                        android:textColor="@color/colorPrimary"
+                        android:textSize="20sp" />
+
+                </RelativeLayout>
+
+                <TextView
+                    android:id="@+id/RankTitleUser"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:layout_marginTop="20dp"
+                    android:singleLine="true"
+                    android:text="میزان معروفیت"
+                    android:textColor="@color/colorPrimary"
+                    android:textSize="20sp"
+                    tools:textColor="@android:color/darker_gray" />
+
+            </LinearLayout>
+
+
+        </LinearLayout>
+    </LinearLayout>
+
+
+    <FrameLayout
+        android:id="@+id/container"
+        android:layout_width="match_parent"
+        android:layout_height="0dip"
+        app:layout_constraintBottom_toTopOf="@+id/bottom_navigation_view_linear"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"/>
+
+    <com.gauravk.bubblenavigation.BubbleNavigationLinearView
+        android:id="@+id/bottom_navigation_view_linear"
+        android:layout_width="match_parent"
+        android:layout_height="80dp"
+        android:background="@drawable/bottom_navigation_bg"
+        android:elevation="8dp"
+        android:orientation="horizontal"
+        android:layout_margin="8dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <com.gauravk.bubblenavigation.BubbleToggleView
+            android:id="@+id/navigation_scan"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:bt_active="false"
+            android:layout_marginEnd="15dp"
+            app:bt_colorActive="#f44336"
+            app:bt_colorInactive="#e57373"
+            app:bt_icon="@drawable/scan"
+            app:bt_padding="5dp"
+            app:bt_shape="@drawable/transition_background_drawable_scan"
+            app:bt_title="اسکن"
+            app:bt_titlePadding="10dp" />
+
+
+        <com.gauravk.bubblenavigation.BubbleToggleView
+            android:id="@+id/navigation_fame"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:bt_active="true"
+            app:bt_colorActive="#03a9f4"
+            app:bt_colorInactive="#64b5f6"
+            android:layout_marginEnd="15dp"
+            app:bt_icon="@drawable/fame"
+            app:bt_padding="5dp"
+            app:bt_shape="@drawable/transition_background_drawable_fame"
+            app:bt_title="معروفیت"
+            app:bt_titlePadding="10dp" />
+
+        <com.gauravk.bubblenavigation.BubbleToggleView
+            android:id="@+id/navigation_rank"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:bt_active="false"
+            android:layout_marginEnd="15dp"
+            app:bt_colorActive="#CC145F"
+            app:bt_colorInactive="#FD54A6"
+            app:bt_icon="@drawable/ranking"
+            app:bt_padding="5dp"
+            app:bt_shape="@drawable/transition_background_drawable_rank"
+            app:bt_title="رتــبـه"
+            app:bt_titlePadding="10dp" />
+
+        <com.gauravk.bubblenavigation.BubbleToggleView
+            android:id="@+id/navigation_likeness"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:bt_active="false"
+            app:bt_colorActive="#ffeb3b"
+            app:bt_colorInactive="#fff176"
+            android:layout_marginEnd="15dp"
+            app:bt_icon="@drawable/common_contact"
+            app:bt_padding="5dp"
+            app:bt_shape="@drawable/transition_background_drawable_likeness"
+            app:bt_title="شباهت"
+            app:bt_titlePadding="10dp" />
+
+        <com.gauravk.bubblenavigation.BubbleToggleView
+            android:id="@+id/navigation_contacts"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:bt_active="false"
+            app:bt_colorActive="#9c27b0"
+            app:bt_colorInactive="#ba68c8"
+            app:bt_icon="@drawable/contacts"
+            app:bt_padding="5dp"
+            app:bt_shape="@drawable/transition_background_drawable_contacts"
+            app:bt_title="مخــاطـبـیـن"
+            app:bt_titlePadding="10dp" />
+
+
+    </com.gauravk.bubblenavigation.BubbleNavigationLinearView>
+
+
+</android.support.constraint.ConstraintLayout>

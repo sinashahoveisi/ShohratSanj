@@ -159,7 +159,7 @@ public class MainActivity extends AppCompatActivity {
                                             {
                                                 currentUser = getSharedPreferences("PREFERENCE",MODE_PRIVATE).getBoolean("currentUser",false);
                                                 if (currentUser) {
-                                                    startActivity(new Intent(MainActivity.this, SearchPerson.class));
+                                                    startActivity(new Intent(MainActivity.this, RankActivity.class));
                                                     finish();
                                                 }
                                                 else {
